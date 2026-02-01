@@ -47,24 +47,24 @@ dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"</code></pre>
 
   <h3>Workflow Diagram:</h3>
   <div class="diagram">
-GitHub Actions (GitHub server) open source cloud
+GitHub Actions (GitHub server) – Open Source Cloud
     ↓ (HTTPS, using token from GitHub Secrets)
-1. Clones your repo
-2. Compiles the code
-3. Runs tests
-4. Analyzes with SonarScanner
-    ↓
-5. Sends ONLY the results → SonarCloud
+1️⃣ Creates Ubuntu VM (runner)
+2️⃣ Clones your repo
+3️⃣ Installs .NET SDK, Java JDK, and SonarScanner
+4️⃣ Compiles the code
+5️⃣ Runs unit/integration tests
+6️⃣ Analyzes code with SonarScanner
+    ↓ (via API)
+7️⃣ Sends ONLY results → SonarCloud
     ↓
 SonarCloud (cloud server)
-    ↓
-6. Processes results
-7. Applies Quality Gate
-8. Responds ✅ or ❌
+8️⃣ Processes results
+9️⃣ Applies Quality Gate
+🔟 Responds ✅ or ❌
     ↓
 GitHub Actions
-    ↓
-9. Marks the check as successful/failed
+1️⃣1️⃣ Marks the check as successful/failed
   </div>
 
   <p><strong>Key Features:</strong> Quality Gate enforcement, tests & coverage, metrics only (no source code), PR integration. Communication with SonarCloud is secured via HTTPS.</p>
@@ -87,25 +87,22 @@ GitHub Actions
   <div class="diagram">
 GitHub Actions (GitHub server)
     ↓ (HTTPS, using token from GitHub Secrets)
-1. Executes the .yml
-2. The .yml says: "Connect to MY VPS at http://my-vps-ip:9000"
-    ↓
+1️⃣ Executes workflow (.yml)
+2️⃣ Creates Ubuntu VM (runner)
+3️⃣ Clones repo
+4️⃣ Installs .NET SDK, Java JDK, and SonarScanner
     ↓ (via HTTP/HTTPS)
-    ↓
 VPS (your private server with public IP)
-    ↓
-3. GitHub Actions sends instruction to VPS: "Clone this repo and analyze it"
-    ↓
-4. SonarQube Server (on the VPS) clones your repo
-5. SonarQube compiles the code
-6. SonarQube runs tests
-7. SonarQube performs complete analysis
-8. SonarQube saves results in its DB (also on the VPS)
-9. SonarQube responds to GitHub: ✅ or ❌
+5️⃣ GitHub Actions sends instruction: "Clone this repo and analyze it"
+6️⃣ SonarQube server clones repo
+7️⃣ Compiles code
+8️⃣ Runs tests
+9️⃣ Performs complete SonarQube analysis
+🔟 Saves results in VPS database
+1️⃣1️⃣ Responds to GitHub Actions ✅ or ❌
     ↓
 GitHub Actions
-    ↓
-10. Marks the check as successful/failed
+1️⃣2️⃣ Marks the check as successful/failed
   </div>
 
   <p><strong>Key Features:</strong> Full data control, internal repos, Quality Gates supported, requires maintenance. Communication between GitHub Actions and VPS is over HTTP/HTTPS with token authentication.</p>
@@ -128,25 +125,22 @@ GitHub Actions
   <div class="diagram">
 Developer's Local Machine
     ↓
-1. Makes code changes
-2. Executes: git commit -m "message"
+1️⃣ Makes code changes
+2️⃣ Executes: git commit -m "message"
     ↓
-3. Git triggers pre-commit hook
-    ↓
-4. Hook executes dotnet-sonarscanner locally
-5. Analyzes code on developer's machine
-6. Sends ONLY results → SonarCloud
+3️⃣ Git triggers pre-commit hook
+4️⃣ Hook executes dotnet-sonarscanner locally
+5️⃣ Analyzes code on developer's machine
+6️⃣ Sends ONLY results → SonarCloud
     ↓ (HTTPS using local token)
 SonarCloud (cloud server)
-    ↓
-7. Processes results
-8. Stores in dashboard
-9. Returns ✅ or ❌
+7️⃣ Processes results
+8️⃣ Stores in dashboard
+9️⃣ Returns ✅ or ❌
     ↓
 Pre-commit hook
-    ↓
-10. If ✅ → Commit proceeds
-11. If ❌ → Commit is blocked
+1️⃣0️⃣ If ✅ → Commit proceeds
+1️⃣1️⃣ If ❌ → Commit is blocked
   </div>
 
   <p><strong>Key Features:</strong> Immediate feedback, prevents bad commits, skips tests for speed, token per developer, optional bypass. Communication with SonarCloud is secured via HTTPS.</p>
@@ -162,9 +156,9 @@ Pre-commit hook
       <th>Local Pre-commit</th>
     </tr>
     <tr><td>Installation</td><td>None</td><td>VPS setup</td><td>Local</td></tr>
-    <tr><td>CI/CD integration</td><td>✅</td><td>✅</td><td>❌</td></tr>
+    <tr><td>CI/CD integration</td><td>✅ Workflow</td><td>✅ Workflow</td><td>❌ Hook</td></tr>
     <tr><td>Quality Gate</td><td>✅</td><td>✅</td><td>✅ (Local)</td></tr>
-    <tr><td>Immediate Feedback</td><td>❌</td><td>❌</td><td>✅</td></tr>
+    <tr><td>Immediate Feedback</td><td>❌</td><td>❌</td><td>✅ Hook</td></tr>
     <tr><td>Maintenance</td><td>❌</td><td>✅</td><td>❌</td></tr>
     <tr><td>Data Privacy</td><td>Cloud</td><td>Full control</td><td>Local</td></tr>
     <tr><td>Team Sharing</td><td>✅</td><td>✅</td><td>❌</td></tr>
