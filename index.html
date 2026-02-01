@@ -3,22 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SonarQube Workflow Guide</title>
+<title>SonarQube Quick Guide</title>
 <style>
-  body { font-family: Arial, sans-serif; line-height:1.6; background:#f4f4f4; color:#333; margin:0; padding:0;}
-  header { background:#24292f; color:#fff; padding:1.5rem 2rem; text-align:center;}
-  h1 { margin:0; font-size:2rem;}
-  section { padding:2rem; max-width:1000px; margin:auto; background:#fff; margin-bottom:1rem; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1);}
-  h2 { color:#0366d6; margin-bottom:0.5rem;}
-  p { margin-bottom:1rem;}
-  .diagram { display:flex; flex-direction:column; align-items:center; position:relative; margin:2rem 0;}
-  .box { padding:1rem 1.2rem; border-radius:8px; margin:0.8rem 0; text-align:center; min-width:240px; position:relative; box-shadow:0 2px 6px rgba(0,0,0,0.15);}
-  .gh-actions { background:#6f42c1; color:#fff; }
-  .sonar-cloud { background:#28a745; color:#fff; }
-  .vps { background:#ff6f61; color:#fff; }
-  .local { background:#0366d6; color:#fff; }
-  .arrow { width:2px; height:40px; background:#333; position:relative; margin:0;}
-  .arrow:after { content:""; position:absolute; top:40px; left:-6px; border-left:6px solid transparent; border-right:6px solid transparent; border-top:10px solid #333;}
+  body { font-family: Arial, sans-serif; line-height: 1.6; background: #f9f9f9; color: #333; margin:0; padding:0; }
+  header { background: #24292f; color: #fff; padding: 1rem 2rem; text-align:center; }
+  h1 { margin:0; font-size:2rem; }
+  section { padding: 2rem; max-width: 900px; margin:auto; background:#fff; margin-bottom:1rem; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.1);}
+  h2 { color:#0366d6; margin-bottom:0.5rem; }
+  p { margin-bottom:1rem; }
+  ol { margin-left:1.5rem; }
+  table { width:100%; border-collapse: collapse; margin:1rem 0; }
+  th, td { border:1px solid #ddd; padding:0.5rem; text-align:left; }
+  th { background:#0366d6; color:#fff; }
+  .diagram { display:flex; flex-direction:column; align-items:center; margin:1rem 0; }
+  .box { background:#0366d6; color:#fff; padding:0.8rem 1rem; border-radius:8px; margin:0.5rem 0; text-align:center; min-width:220px; box-shadow:0 2px 6px rgba(0,0,0,0.15);}
+  .arrow { width:2px; height:20px; background:#333; position:relative; margin:0; }
+  .arrow:after { content:""; position:absolute; top:20px; left:-5px; border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid #333; }
   footer { text-align:center; padding:1rem; background:#24292f; color:#fff; margin-top:1rem;}
   a.button { display:inline-block; padding:0.5rem 1rem; margin-top:0.5rem; background:#28a745; color:#fff; text-decoration:none; border-radius:5px;}
   a.button:hover { background:#218838; }
@@ -27,108 +27,69 @@
 <body>
 
 <header>
-  <h1>SonarQube Workflow Guide</h1>
-  <p>SonarCloud, VPS, Local Pre-commit Hooks with GitHub Actions</p>
+  <h1>SonarQube Quick Guide</h1>
+  <p>Setup & Workflows: SonarCloud, VPS, Local Pre-commit Hooks</p>
 </header>
 
-<!-- SonarCloud -->
 <section>
-<h2>1️⃣ SonarCloud Workflow</h2>
-<p><strong>Goal:</strong> Run automated analysis in GitHub Actions and enforce Quality Gate.</p>
+  <h2>1️⃣ SonarCloud (Cloud / Open Source)</h2>
+  <p><strong>Goal:</strong> Integrate code analysis in GitHub Actions with mandatory Quality Gate.</p>
 
-<div class="diagram">
-  <div class="box gh-actions">GitHub Actions Runner (VM)</div>
-  <div class="arrow"></div>
-  <div class="box gh-actions">
-    1. Provision VM with Ubuntu<br>
-    2. Install Java SDK<br>
-    3. Install .NET SDK<br>
-    4. Install SonarScanner CLI<br>
-    5. Checkout repo
+  <div class="diagram">
+    <div class="box">GitHub Actions<br>(GitHub server)</div>
+    <div class="arrow"></div>
+    <div class="box">1. Clone repo<br>2. Compile code<br>3. Run tests<br>4. Analyze with SonarScanner</div>
+    <div class="arrow"></div>
+    <div class="box">5. Send results → SonarCloud</div>
+    <div class="arrow"></div>
+    <div class="box">SonarCloud (Cloud Server)<br>6. Process results<br>7. Apply Quality Gate<br>8. Respond ✅/❌</div>
+    <div class="arrow"></div>
+    <div class="box">GitHub Actions<br>9. Mark check as success/fail</div>
   </div>
-  <div class="arrow"></div>
-  <div class="box gh-actions">
-    6. Build project<br>
-    7. Run unit tests<br>
-    8. Execute SonarScanner analysis
-  </div>
-  <div class="arrow"></div>
-  <div class="box sonar-cloud">
-    SonarCloud (Cloud Server)<br>
-    9. Process results<br>
-    10. Apply Quality Gate<br>
-    11. Return ✅ or ❌
-  </div>
-  <div class="arrow"></div>
-  <div class="box gh-actions">12. Mark PR check as Success/Fail</div>
-</div>
+
 </section>
 
-<!-- VPS -->
 <section>
-<h2>2️⃣ Self-hosted SonarQube (VPS)</h2>
-<p><strong>Goal:</strong> Full control of server, code analysis, and results storage.</p>
+  <h2>2️⃣ Self-hosted SonarQube (VPS / Enterprise)</h2>
+  <p><strong>Goal:</strong> Full control over server & data; analysis in CI/CD.</p>
 
-<div class="diagram">
-  <div class="box gh-actions">GitHub Actions Runner (VM)</div>
-  <div class="arrow"></div>
-  <div class="box gh-actions">
-    1. Provision VM with Ubuntu<br>
-    2. Install Java SDK<br>
-    3. Install .NET SDK<br>
-    4. Install SonarScanner CLI<br>
-    5. Checkout repo<br>
-    6. Connect to VPS SonarQube at http://my-vps-ip:9000
+  <div class="diagram">
+    <div class="box">GitHub Actions<br>(GitHub server)</div>
+    <div class="arrow"></div>
+    <div class="box">1. Execute workflow (.yml)<br>2. Connect to VPS http://my-vps-ip:9000</div>
+    <div class="arrow"></div>
+    <div class="box">VPS (Public IP)<br>3. GitHub sends: "Clone & Analyze"</div>
+    <div class="arrow"></div>
+    <div class="box">SonarQube Server (VPS)<br>4. Clone repo<br>5. Compile<br>6. Run tests<br>7. Complete analysis<br>8. Save results in DB<br>9. Respond ✅/❌</div>
+    <div class="arrow"></div>
+    <div class="box">GitHub Actions<br>10. Mark check as success/fail</div>
   </div>
-  <div class="arrow"></div>
-  <div class="box vps">
-    VPS (Public IP)<br>
-    7. Receive request: Clone & analyze repo<br>
-    8. Compile project<br>
-    9. Run tests<br>
-    10. Perform full SonarQube analysis<br>
-    11. Store results in VPS database<br>
-    12. Return ✅/❌ to GitHub Actions
-  </div>
-  <div class="arrow"></div>
-  <div class="box gh-actions">13. Mark PR check as Success/Fail</div>
-</div>
+
 </section>
 
-<!-- Local Pre-commit -->
 <section>
-<h2>3️⃣ Local Pre-commit Hooks</h2>
-<p><strong>Goal:</strong> Provide immediate feedback before committing code.</p>
+  <h2>3️⃣ Local Pre-commit Hooks</h2>
+  <p><strong>Goal:</strong> Immediate feedback before committing code.</p>
 
-<div class="diagram">
-  <div class="box local">Developer's Local Machine</div>
-  <div class="arrow"></div>
-  <div class="box local">
-    1. Make code changes<br>
-    2. git commit -m "message"
+  <div class="diagram">
+    <div class="box">Developer's Local Machine</div>
+    <div class="arrow"></div>
+    <div class="box">1. Make code changes<br>2. git commit -m "message"</div>
+    <div class="arrow"></div>
+    <div class="box">3. Git triggers pre-commit hook</div>
+    <div class="arrow"></div>
+    <div class="box">4. Hook executes dotnet-sonarscanner locally<br>5. Analyze code<br>6. Send results → SonarCloud</div>
+    <div class="arrow"></div>
+    <div class="box">SonarCloud (Cloud Server)<br>7. Process results<br>8. Store in dashboard<br>9. Return ✅/❌</div>
+    <div class="arrow"></div>
+    <div class="box">Pre-commit hook<br>10. ✅ Commit proceeds<br>❌ Commit blocked</div>
   </div>
-  <div class="arrow"></div>
-  <div class="box local">
-    3. Git triggers pre-commit hook<br>
-    4. Hook executes dotnet-sonarscanner<br>
-    5. Analyze code locally<br>
-    6. Send results → SonarCloud
-  </div>
-  <div class="arrow"></div>
-  <div class="box sonar-cloud">
-    SonarCloud<br>
-    7. Process results<br>
-    8. Store in dashboard<br>
-    9. Return ✅/❌
-  </div>
-  <div class="arrow"></div>
-  <div class="box local">10. If ✅ → Commit proceeds<br>❌ → Commit blocked</div>
-</div>
+
 </section>
 
 <footer>
-<p>Created by Juan Carlos Diaz – SonarQube Quick Guide</p>
-<a class="button" href="https://github.com/JuanCarlosDiaz/sonarqube-manual" target="_blank">View GitHub Repo</a>
+  <p>Created by Juan Carlos Diaz – SonarQube Quick Guide</p>
+  <a class="button" href="https://github.com/JuanCarlosDiaz/sonarqube-manual" target="_blank">View GitHub Repo</a>
 </footer>
 
 </body>
