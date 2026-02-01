@@ -10,11 +10,11 @@
   h1 { margin:0; font-size:2rem; }
   section { padding: 2rem; max-width: 900px; margin:auto; background:#fff; margin-bottom:1rem; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.1);}
   h2 { color:#0366d6; }
-  pre { background:#f0f0f0; padding:1rem; overflow-x:auto; border-radius:5px; }
+  pre { background:#f0f0f0; padding:1rem; overflow-x:auto; border-radius:5px; white-space: pre-wrap; }
   table { width:100%; border-collapse: collapse; margin:1rem 0; }
   th, td { border:1px solid #ddd; padding:0.5rem; text-align:left; }
   th { background:#0366d6; color:#fff; }
-  .diagram { text-align:center; margin:1rem 0; font-family: monospace; background:#f0f0f0; padding:1rem; border-radius:5px; white-space: pre-wrap;}
+  .diagram { text-align:left; margin:1rem 0; font-family: monospace; background:#f0f0f0; padding:1rem; border-radius:5px; white-space: pre-wrap;}
   footer { text-align:center; padding:1rem; background:#24292f; color:#fff; margin-top:1rem;}
   a.button { display:inline-block; padding:0.5rem 1rem; margin-top:0.5rem; background:#28a745; color:#fff; text-decoration:none; border-radius:5px;}
   a.button:hover { background:#218838; }
@@ -44,8 +44,26 @@ dotnet build
 dotnet test --logger:trx
 dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"</code></pre>
 
+  <h3>Workflow Diagram:</h3>
   <div class="diagram">
-Developer → GitHub Actions → SonarScanner CLI → SonarCloud → PR ✅/❌
+GitHub Actions (GitHub server) open source cloud
+    ↓
+1. Clones your repo
+2. Compiles the code
+3. Runs tests
+4. Analyzes with SonarScanner
+    ↓
+5. Sends ONLY the results → SonarCloud
+    ↓
+SonarCloud (cloud server)
+    ↓
+6. Processes results
+7. Applies Quality Gate
+8. Responds ✅ or ❌
+    ↓
+GitHub Actions
+    ↓
+9. Marks the check as successful/failed
   </div>
 
   <p><strong>Key Features:</strong> Quality Gate enforcement, tests & coverage, metrics only (no source code), PR integration.</p>
@@ -64,8 +82,29 @@ Developer → GitHub Actions → SonarScanner CLI → SonarCloud → PR ✅/❌
     <li>Run build, tests and sonar end</li>
   </ol>
 
+  <h3>Workflow Diagram:</h3>
   <div class="diagram">
-GitHub Actions → SonarScanner → VPS SonarQube → PR ✅/❌
+GitHub Actions (GitHub server)
+    ↓
+1. Executes the .yml
+2. The .yml says: "Connect to MY VPS at http://my-vps-ip:9000"
+    ↓
+    ↓ (via HTTP/HTTPS)
+    ↓
+VPS (your private server with public IP)
+    ↓
+3. GitHub Actions sends instruction to VPS: "Clone this repo and analyze it"
+    ↓
+4. SonarQube Server (on the VPS) clones your repo
+5. SonarQube compiles the code
+6. SonarQube runs tests
+7. SonarQube performs complete analysis
+8. SonarQube saves results in its DB (also on the VPS)
+9. SonarQube responds to GitHub: ✅ or ❌
+    ↓
+GitHub Actions
+    ↓
+10. Marks the check as successful/failed
   </div>
 
   <p><strong>Key Features:</strong> Full data control, internal repos, Quality Gates supported, requires maintenance.</p>
@@ -83,14 +122,29 @@ GitHub Actions → SonarScanner → VPS SonarQube → PR ✅/❌
     <li>Every commit runs analysis before saving</li>
   </ol>
 
-  <pre><code>#!/bin/bash
-export SONAR_TOKEN="your_local_token"
-dotnet sonarscanner begin /k:"project-key" /o:"org-key" /d:sonar.token="$SONAR_TOKEN"
-dotnet build
-dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"</code></pre>
-
+  <h3>Workflow Diagram:</h3>
   <div class="diagram">
-Developer commit → Local Pre-commit Hook → SonarScanner → PR feedback ✅/❌
+Developer's Local Machine
+    ↓
+1. Makes code changes
+2. Executes: git commit -m "message"
+    ↓
+3. Git triggers pre-commit hook
+    ↓
+4. Hook executes dotnet-sonarscanner locally
+5. Analyzes code on developer's machine
+6. Sends ONLY results → SonarCloud
+    ↓
+SonarCloud (cloud server)
+    ↓
+7. Processes results
+8. Stores in dashboard
+9. Returns ✅ or ❌
+    ↓
+Pre-commit hook
+    ↓
+10. If ✅ → Commit proceeds
+11. If ❌ → Commit is blocked
   </div>
 
   <p><strong>Key Features:</strong> Immediate feedback, prevents bad commits, skips tests for speed, token per developer, optional bypass.</p>
