@@ -40,4 +40,141 @@
     <li>Create GitHub Actions workflow <code>.github/workflows/sonarcloud.yml</code> with build, test and sonar analysis</li>
   </ol>
 
-  <pre><code>dotnet sonarscanner begin /k:"project-key" /o:"org-key" /d:sonar.token="${{ secrets.SONAR
+  <pre><code>dotnet sonarscanner begin /k:"project-key" /o:"org-key" /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+dotnet build
+dotnet test --logger:trx
+dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"</code></pre>
+
+  <h3>Workflow Diagram:</h3>
+  <div class="diagram">
+GitHub Actions (GitHub server) open source cloud
+    ↓ (HTTPS, using token from GitHub Secrets)
+1. Clones your repo
+2. Compiles the code
+3. Runs tests
+4. Analyzes with SonarScanner
+    ↓
+5. Sends ONLY the results → SonarCloud
+    ↓
+SonarCloud (cloud server)
+    ↓
+6. Processes results
+7. Applies Quality Gate
+8. Responds ✅ or ❌
+    ↓
+GitHub Actions
+    ↓
+9. Marks the check as successful/failed
+  </div>
+
+  <p><strong>Key Features:</strong> Quality Gate enforcement, tests & coverage, metrics only (no source code), PR integration. Communication with SonarCloud is secured via HTTPS.</p>
+</section>
+
+<section>
+  <h2>2️⃣ Self-hosted SonarQube (VPS / Enterprise)</h2>
+  <p><strong>Goal:</strong> Full control over server & data; analysis in CI/CD.</p>
+
+  <h3>Setup Steps:</h3>
+  <ol>
+    <li>Install SonarQube on VPS</li>
+    <li>Open port 9000 for access</li>
+    <li>Create user & token</li>
+    <li>Configure GitHub Actions workflow to point to VPS using the token from GitHub Secrets</li>
+    <li>Run build, tests and sonar end</li>
+  </ol>
+
+  <h3>Workflow Diagram:</h3>
+  <div class="diagram">
+GitHub Actions (GitHub server)
+    ↓ (HTTPS, using token from GitHub Secrets)
+1. Executes the .yml
+2. The .yml says: "Connect to MY VPS at http://my-vps-ip:9000"
+    ↓
+    ↓ (via HTTP/HTTPS)
+    ↓
+VPS (your private server with public IP)
+    ↓
+3. GitHub Actions sends instruction to VPS: "Clone this repo and analyze it"
+    ↓
+4. SonarQube Server (on the VPS) clones your repo
+5. SonarQube compiles the code
+6. SonarQube runs tests
+7. SonarQube performs complete analysis
+8. SonarQube saves results in its DB (also on the VPS)
+9. SonarQube responds to GitHub: ✅ or ❌
+    ↓
+GitHub Actions
+    ↓
+10. Marks the check as successful/failed
+  </div>
+
+  <p><strong>Key Features:</strong> Full data control, internal repos, Quality Gates supported, requires maintenance. Communication between GitHub Actions and VPS is over HTTP/HTTPS with token authentication.</p>
+</section>
+
+<section>
+  <h2>3️⃣ Local Pre-commit Hooks</h2>
+  <p><strong>Goal:</strong> Immediate feedback before committing code.</p>
+
+  <h3>Setup Steps:</h3>
+  <ol>
+    <li>Install <code>dotnet-sonarscanner</code> locally</li>
+    <li>Create <code>.git/hooks/pre-commit</code> with analysis script</li>
+    <li>Set your Sonar token in environment variable, e.g., <code>$env:SONAR_TOKEN</code></li>
+    <li>Make script executable (<code>chmod +x .git/hooks/pre-commit</code>)</li>
+    <li>Every commit runs analysis before saving</li>
+  </ol>
+
+  <h3>Workflow Diagram:</h3>
+  <div class="diagram">
+Developer's Local Machine
+    ↓
+1. Makes code changes
+2. Executes: git commit -m "message"
+    ↓
+3. Git triggers pre-commit hook
+    ↓
+4. Hook executes dotnet-sonarscanner locally
+5. Analyzes code on developer's machine
+6. Sends ONLY results → SonarCloud
+    ↓ (HTTPS using local token)
+SonarCloud (cloud server)
+    ↓
+7. Processes results
+8. Stores in dashboard
+9. Returns ✅ or ❌
+    ↓
+Pre-commit hook
+    ↓
+10. If ✅ → Commit proceeds
+11. If ❌ → Commit is blocked
+  </div>
+
+  <p><strong>Key Features:</strong> Immediate feedback, prevents bad commits, skips tests for speed, token per developer, optional bypass. Communication with SonarCloud is secured via HTTPS.</p>
+</section>
+
+<section>
+  <h2>🔄 Quick Comparison</h2>
+  <table>
+    <tr>
+      <th>Feature</th>
+      <th>SonarCloud</th>
+      <th>VPS SonarQube</th>
+      <th>Local Pre-commit</th>
+    </tr>
+    <tr><td>Installation</td><td>None</td><td>VPS setup</td><td>Local</td></tr>
+    <tr><td>CI/CD integration</td><td>✅</td><td>✅</td><td>❌</td></tr>
+    <tr><td>Quality Gate</td><td>✅</td><td>✅</td><td>✅ (Local)</td></tr>
+    <tr><td>Immediate Feedback</td><td>❌</td><td>❌</td><td>✅</td></tr>
+    <tr><td>Maintenance</td><td>❌</td><td>✅</td><td>❌</td></tr>
+    <tr><td>Data Privacy</td><td>Cloud</td><td>Full control</td><td>Local</td></tr>
+    <tr><td>Team Sharing</td><td>✅</td><td>✅</td><td>❌</td></tr>
+  </table>
+</section>
+
+<footer>
+  <p>Created by Juan Carlos Diaz – SonarQube Quick Guide</p>
+  <a class="button" href="https://github.com/JuanCarlosDiaz/sonarqube-manual" target="_blank">View GitHub Repo</a>
+</footer>
+
+</body>
+</html>
